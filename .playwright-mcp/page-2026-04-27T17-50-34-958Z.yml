@@ -1,0 +1,12 @@
+- generic [ref=e4]:
+  - generic [ref=e5]:
+    - heading "✦ Salvation" [level=1] [ref=e6]
+    - paragraph [ref=e7]: Your mental health companion
+  - generic [ref=e8]:
+    - button "Sign In" [ref=e9] [cursor=pointer]
+    - button "Register" [ref=e10] [cursor=pointer]
+  - generic [ref=e11]:
+    - textbox "Email" [ref=e12]: qa_user_20260427@example.com
+    - textbox "Password" [ref=e13]: QaPassword123!
+    - paragraph [ref=e16]: Failed to fetch
+    - button "Create Account" [ref=e15] [cursor=pointer]

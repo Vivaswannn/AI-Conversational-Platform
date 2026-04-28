@@ -1,0 +1,382 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Salvation — Full Design Preview</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #f5f0eb; min-height: 100vh; padding: 24px; }
+
+  h1 { font-size: 18px; font-weight: 700; color: #444; margin-bottom: 6px; }
+  .subtitle { font-size: 13px; color: #999; margin-bottom: 24px; }
+
+  /* ── App shell ── */
+  .app-shell {
+    display: flex;
+    height: 600px;
+    border-radius: 16px;
+    overflow: hidden;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.15);
+    border: 1px solid #e8d5bc;
+  }
+
+  /* ── Sidebar ── */
+  .sidebar {
+    width: 280px;
+    background: #fdf3e8;
+    border-right: 1px solid #f0dfc8;
+    display: flex;
+    flex-direction: column;
+    flex-shrink: 0;
+  }
+  .sidebar-header {
+    padding: 20px 16px 12px;
+    border-bottom: 1px solid #f0dfc8;
+  }
+  .logo {
+    font-size: 18px;
+    font-weight: 800;
+    color: #c17f3a;
+    letter-spacing: -0.5px;
+    margin-bottom: 12px;
+  }
+  .new-chat-btn {
+    background: linear-gradient(135deg, #e8875a, #c17f3a);
+    color: white;
+    border: none;
+    border-radius: 8px;
+    padding: 8px 14px;
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    width: 100%;
+    text-align: left;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .convo-list { flex: 1; overflow-y: auto; padding: 8px; }
+  .convo-item {
+    padding: 10px 12px;
+    border-radius: 10px;
+    cursor: pointer;
+    margin-bottom: 4px;
+    transition: background 0.15s;
+  }
+  .convo-item.active {
+    background: linear-gradient(135deg, rgba(232,135,90,0.15), rgba(193,127,58,0.1));
+    border: 1px solid rgba(193,127,58,0.2);
+  }
+  .convo-item:hover:not(.active) { background: rgba(0,0,0,0.04); }
+  .convo-title { font-size: 13px; font-weight: 600; color: #444; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .convo-preview { font-size: 11px; color: #aaa; margin-top: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .convo-date { font-size: 10px; color: #ccc; margin-top: 2px; }
+  .sidebar-footer {
+    padding: 12px 16px;
+    border-top: 1px solid #f0dfc8;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .avatar {
+    width: 32px; height: 32px;
+    background: linear-gradient(135deg, #e8875a, #c17f3a);
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 13px; font-weight: 700; color: white; flex-shrink: 0;
+  }
+  .user-info { flex: 1; overflow: hidden; }
+  .user-email { font-size: 11px; color: #666; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .logout-btn { font-size: 11px; color: #c17f3a; cursor: pointer; background: none; border: none; }
+
+  /* ── Chat area ── */
+  .chat-area {
+    flex: 1;
+    background: #fffaf4;
+    display: flex;
+    flex-direction: column;
+  }
+  .chat-header {
+    padding: 16px 20px;
+    border-bottom: 1px solid #f0dfc8;
+    background: white;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .chat-title { font-size: 14px; font-weight: 700; color: #333; }
+  .chat-subtitle { font-size: 11px; color: #aaa; margin-top: 1px; }
+  .messages { flex: 1; overflow-y: auto; padding: 20px; display: flex; flex-direction: column; gap: 12px; }
+
+  .msg { display: flex; flex-direction: column; max-width: 75%; }
+  .msg.ai { align-self: flex-start; }
+  .msg.user { align-self: flex-end; }
+  .msg-label { font-size: 10px; font-weight: 600; color: #c17f3a; margin-bottom: 4px; }
+  .msg-bubble {
+    padding: 12px 16px;
+    border-radius: 16px;
+    font-size: 13px;
+    line-height: 1.6;
+  }
+  .msg.ai .msg-bubble {
+    background: white;
+    color: #444;
+    border: 1px solid #f0dfc8;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+    border-radius: 4px 16px 16px 16px;
+  }
+  .msg.user .msg-bubble {
+    background: linear-gradient(135deg, #e8875a, #c17f3a);
+    color: white;
+    box-shadow: 0 2px 8px rgba(232,135,90,0.35);
+    border-radius: 16px 4px 16px 16px;
+  }
+
+  /* Crisis alert */
+  .crisis-alert {
+    background: linear-gradient(135deg, #fff5f5, #fff0f0);
+    border: 1px solid #ffcdd2;
+    border-left: 4px solid #e53935;
+    border-radius: 12px;
+    padding: 14px 16px;
+    max-width: 85%;
+    align-self: flex-start;
+  }
+  .crisis-alert-header { display: flex; align-items: center; gap: 6px; margin-bottom: 8px; }
+  .crisis-badge { background: #e53935; color: white; font-size: 9px; font-weight: 700; padding: 2px 6px; border-radius: 4px; letter-spacing: 0.5px; }
+  .crisis-alert-title { font-size: 12px; font-weight: 700; color: #c62828; }
+  .crisis-alert-body { font-size: 12px; color: #555; line-height: 1.6; }
+  .crisis-hotline { display: inline-flex; align-items: center; gap: 4px; background: #e53935; color: white; border-radius: 6px; padding: 4px 10px; font-size: 11px; font-weight: 600; margin-top: 8px; }
+
+  /* Typing indicator */
+  .typing { display: flex; align-items: center; gap: 4px; padding: 10px 14px; background: white; border: 1px solid #f0dfc8; border-radius: 4px 16px 16px 16px; width: fit-content; box-shadow: 0 2px 8px rgba(0,0,0,0.05); }
+  .dot { width: 6px; height: 6px; background: #c17f3a; border-radius: 50%; animation: bounce 1.2s infinite; }
+  .dot:nth-child(2) { animation-delay: 0.2s; }
+  .dot:nth-child(3) { animation-delay: 0.4s; }
+  @keyframes bounce { 0%,60%,100%{transform:translateY(0)} 30%{transform:translateY(-6px)} }
+
+  /* Input */
+  .chat-input-area {
+    padding: 16px 20px;
+    border-top: 1px solid #f0dfc8;
+    background: white;
+    display: flex;
+    align-items: flex-end;
+    gap: 10px;
+  }
+  .input-box {
+    flex: 1;
+    background: #fdf6ee;
+    border: 1px solid #f0dfc8;
+    border-radius: 12px;
+    padding: 10px 14px;
+    font-size: 13px;
+    color: #444;
+    resize: none;
+    outline: none;
+    min-height: 42px;
+    font-family: inherit;
+  }
+  .send-btn {
+    width: 40px; height: 40px;
+    background: linear-gradient(135deg, #e8875a, #c17f3a);
+    border: none;
+    border-radius: 10px;
+    cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    box-shadow: 0 2px 8px rgba(232,135,90,0.4);
+    flex-shrink: 0;
+  }
+  .send-icon { color: white; font-size: 16px; }
+
+  /* ── Tabs below ── */
+  .screens-row { display: flex; gap: 16px; margin-top: 24px; }
+  .screen-card { flex: 1; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 16px rgba(0,0,0,0.1); border: 1px solid #e8d5bc; }
+  .screen-label { font-size: 11px; font-weight: 700; color: #888; text-transform: uppercase; letter-spacing: 0.8px; margin-bottom: 8px; }
+
+  /* Login screen mini */
+  .login-mini {
+    background: #fffaf4;
+    padding: 24px 20px;
+    min-height: 220px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .login-card {
+    background: white;
+    border-radius: 14px;
+    padding: 20px;
+    width: 100%;
+    box-shadow: 0 4px 16px rgba(0,0,0,0.07);
+    border: 1px solid #f0dfc8;
+  }
+  .login-logo { font-size: 16px; font-weight: 800; color: #c17f3a; text-align: center; margin-bottom: 4px; }
+  .login-tagline { font-size: 10px; color: #bbb; text-align: center; margin-bottom: 14px; }
+  .login-tabs { display: flex; background: #fdf6ee; border-radius: 8px; padding: 3px; margin-bottom: 14px; }
+  .login-tab { flex: 1; text-align: center; padding: 5px; font-size: 11px; border-radius: 6px; color: #aaa; cursor: pointer; }
+  .login-tab.active { background: white; color: #c17f3a; font-weight: 600; box-shadow: 0 1px 4px rgba(0,0,0,0.08); }
+  .login-field { background: #fdf6ee; border: 1px solid #f0dfc8; border-radius: 8px; padding: 8px 12px; font-size: 11px; color: #bbb; margin-bottom: 8px; }
+  .login-submit { background: linear-gradient(135deg, #e8875a, #c17f3a); border-radius: 8px; padding: 9px; text-align: center; font-size: 12px; color: white; font-weight: 600; }
+
+  /* Empty state mini */
+  .empty-mini {
+    background: #fffaf4;
+    min-height: 220px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    gap: 8px;
+    padding: 20px;
+    text-align: center;
+  }
+  .empty-icon { font-size: 32px; margin-bottom: 4px; }
+  .empty-title { font-size: 13px; font-weight: 700; color: #555; }
+  .empty-sub { font-size: 11px; color: #aaa; line-height: 1.5; }
+  .empty-cta { background: linear-gradient(135deg, #e8875a, #c17f3a); color: white; border-radius: 8px; padding: 8px 16px; font-size: 11px; font-weight: 600; margin-top: 4px; }
+</style>
+</head>
+<body>
+
+<h1>✦ Salvation — Full Design Preview</h1>
+<p class="subtitle">Warm & Inviting · Sidebar Layout · React + Vite + Tailwind</p>
+
+<!-- Main app shell -->
+<div class="app-shell">
+  <!-- Sidebar -->
+  <div class="sidebar">
+    <div class="sidebar-header">
+      <div class="logo">✦ Salvation</div>
+      <button class="new-chat-btn">＋ &nbsp;New Conversation</button>
+    </div>
+    <div class="convo-list">
+      <div class="convo-item active">
+        <div class="convo-title">Work stress 😔</div>
+        <div class="convo-preview">I've been overwhelmed by...</div>
+        <div class="convo-date">Today</div>
+      </div>
+      <div class="convo-item">
+        <div class="convo-title">Anxiety about the future</div>
+        <div class="convo-preview">What if things don't work out...</div>
+        <div class="convo-date">Yesterday</div>
+      </div>
+      <div class="convo-item">
+        <div class="convo-title">Sleep issues</div>
+        <div class="convo-preview">I haven't slept well in weeks...</div>
+        <div class="convo-date">Mon</div>
+      </div>
+      <div class="convo-item">
+        <div class="convo-title">Feeling disconnected</div>
+        <div class="convo-preview">It's hard to explain but...</div>
+        <div class="convo-date">Last week</div>
+      </div>
+    </div>
+    <div class="sidebar-footer">
+      <div class="avatar">V</div>
+      <div class="user-info">
+        <div class="user-email">vivaswan@example.com</div>
+      </div>
+      <button class="logout-btn">Sign out</button>
+    </div>
+  </div>
+
+  <!-- Chat -->
+  <div class="chat-area">
+    <div class="chat-header">
+      <div>
+        <div class="chat-title">Work stress 😔</div>
+        <div class="chat-subtitle">Started today · 6 messages</div>
+      </div>
+    </div>
+    <div class="messages">
+      <div class="msg ai">
+        <div class="msg-label">✦ Salvation</div>
+        <div class="msg-bubble">Hi, I'm here with you. What's been on your mind today?</div>
+      </div>
+      <div class="msg user">
+        <div class="msg-bubble">My manager keeps adding more tasks and I feel like I can't keep up.</div>
+      </div>
+      <div class="msg ai">
+        <div class="msg-label">✦ Salvation</div>
+        <div class="msg-bubble">That sounds really exhausting — feeling like the work never ends can wear you down both mentally and physically. How long has this been going on?</div>
+      </div>
+      <div class="msg user">
+        <div class="msg-bubble">A few months now. I feel completely overwhelmed.</div>
+      </div>
+      <!-- Crisis alert example -->
+      <div class="crisis-alert">
+        <div class="crisis-alert-header">
+          <span class="crisis-badge">SUPPORT</span>
+          <span class="crisis-alert-title">You're not alone in this</span>
+        </div>
+        <div class="crisis-alert-body">
+          It sounds like things feel really overwhelming right now. That's valid, and you deserve support.
+          Free help is available anytime:
+        </div>
+        <div><span class="crisis-hotline">📞 988 — Crisis Lifeline · 24/7</span></div>
+      </div>
+      <!-- Typing indicator -->
+      <div class="msg ai">
+        <div class="msg-label">✦ Salvation</div>
+        <div class="typing"><div class="dot"></div><div class="dot"></div><div class="dot"></div></div>
+      </div>
+    </div>
+    <div class="chat-input-area">
+      <textarea class="input-box" placeholder="Share what's on your mind..." rows="1"></textarea>
+      <button class="send-btn"><span class="send-icon">↑</span></button>
+    </div>
+  </div>
+</div>
+
+<!-- Secondary screens row -->
+<div style="margin-top: 24px;">
+  <div style="font-size:13px; font-weight:700; color:#888; text-transform:uppercase; letter-spacing:0.8px; margin-bottom:12px;">Other Screens</div>
+  <div class="screens-row">
+
+    <!-- Login -->
+    <div>
+      <div class="screen-label">Login / Register</div>
+      <div class="screen-card">
+        <div class="login-mini">
+          <div class="login-card">
+            <div class="login-logo">✦ Salvation</div>
+            <div class="login-tagline">Your personal support companion</div>
+            <div class="login-tabs">
+              <div class="login-tab active">Sign In</div>
+              <div class="login-tab">Register</div>
+            </div>
+            <div class="login-field">Email address</div>
+            <div class="login-field">Password</div>
+            <div class="login-submit">Sign In</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Empty state (new user) -->
+    <div>
+      <div class="screen-label">Empty State (New User)</div>
+      <div class="screen-card">
+        <div style="display:flex; height:100%;">
+          <div style="width:90px; background:#fdf3e8; border-right:1px solid #f0dfc8; padding:10px; display:flex; flex-direction:column; gap:6px;">
+            <div style="font-size:9px; font-weight:700; color:#c17f3a; margin-bottom:4px;">✦ Salvation</div>
+            <div style="background:linear-gradient(135deg,#e8875a,#c17f3a); border-radius:6px; padding:5px 6px; font-size:9px; color:white; font-weight:600;">＋ New Chat</div>
+            <div style="font-size:9px; color:#ccc; text-align:center; margin-top:8px;">No conversations yet</div>
+          </div>
+          <div class="empty-mini">
+            <div class="empty-icon">🌿</div>
+            <div class="empty-title">Welcome to Salvation</div>
+            <div class="empty-sub">A safe space to talk through whatever's on your mind.</div>
+            <div class="empty-cta">Start your first conversation</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+</body>
+</html>

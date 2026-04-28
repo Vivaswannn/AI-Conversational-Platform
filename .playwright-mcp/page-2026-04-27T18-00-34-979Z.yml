@@ -1,0 +1,11 @@
+- generic [ref=e4]:
+  - generic [ref=e5]:
+    - heading "✦ Salvation" [level=1] [ref=e6]
+    - paragraph [ref=e7]: Your mental health companion
+  - generic [ref=e8]:
+    - button "Sign In" [ref=e9] [cursor=pointer]
+    - button "Register" [ref=e10] [cursor=pointer]
+  - generic [ref=e11]:
+    - textbox "Email" [ref=e12]
+    - textbox "Password" [ref=e13]
+    - button "Sign In" [ref=e14] [cursor=pointer]
