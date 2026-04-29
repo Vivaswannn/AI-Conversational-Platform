@@ -16,8 +16,25 @@ export function AuthForm({ mode, onSuccess }: AuthFormProps) {
     e.preventDefault();
     setError('');
 
+    const normalizedEmail = email.trim().toLowerCase();
+    const normalizedPassword = password.trim();
+
+    if (!normalizedEmail) {
+      setError('Please enter an email address');
+      return;
+    }
+    // Keep frontend validation permissive but practical; backend is final authority.
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(normalizedEmail)) {
+      setError('Please enter a valid email address (example: name@email.com)');
+      return;
+    }
+    if (!normalizedPassword) {
+      setError('Please enter a password');
+      return;
+    }
+
     // Client-side guard — mirrors the server-side Pydantic validator
-    if (mode === 'register' && password.length < 8) {
+    if (mode === 'register' && normalizedPassword.length < 8) {
       setError('Password must be at least 8 characters');
       return;
     }
@@ -25,7 +42,7 @@ export function AuthForm({ mode, onSuccess }: AuthFormProps) {
     setLoading(true);
     try {
       const fn = mode === 'login' ? login : register;
-      const { access_token } = await fn(email, password);
+      const { access_token } = await fn(normalizedEmail, normalizedPassword);
       onSuccess(access_token);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Something went wrong');

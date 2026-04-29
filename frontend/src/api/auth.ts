@@ -13,7 +13,13 @@ function extractDetail(body: unknown, fallback: string): string {
   if (Array.isArray(detail) && detail.length > 0) {
     // Each item: { loc: string[], msg: string, type: string }
     const first = detail[0] as Record<string, unknown>;
-    if (typeof first.msg === 'string') return first.msg;
+    const msg = typeof first.msg === 'string' ? first.msg : null;
+    const loc = Array.isArray(first.loc)
+      ? first.loc.filter((x): x is string => typeof x === 'string')
+      : [];
+    const field = loc.length > 0 ? loc[loc.length - 1] : '';
+    if (msg && field) return `${field}: ${msg}`;
+    if (msg) return msg;
   }
   return fallback;
 }
